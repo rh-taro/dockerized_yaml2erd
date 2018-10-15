@@ -1,0 +1,136 @@
+# This is the default configuration file. Enabling and disabling is configured
+# in separate files. This file adds all other parameters apart from Enabled.
+require: rubocop-rspec
+
+AllCops:
+  TargetRubyVersion: 2.5
+  Include:
+    - '**/*.gemspec'
+    - '**/*.rake'
+    - '**/config.ru'
+    - '**/Gemfile'
+    - '**/Rakefile'
+    - '**/Guardfile'
+  Exclude:
+    - 'bin/**/*'
+    - 'db/migrate/*'
+    - 'db/*schema.rb'
+    - 'db/seeds.rb'
+    - 'doc/**/*'
+    - 'log/**/*'
+    - 'node_modules/**/*'
+    - 'tmp/**/*'
+    - 'vendor/**/*'
+    - 'workspace/**/*'
+
+  DisplayCopNames: true
+  DisplayStyleGuide: true
+
+Rails:
+  Enabled: true
+
+# The project has a soft limit of 250 chars for line length, but up to 100 chars
+# are allowed in some cases.
+Metrics/LineLength:
+  Max: 250
+  AllowHeredoc: true
+  AllowURI: true
+  IgnoredPatterns:
+    - '\A\s*?#'
+
+# Methods should be short. But sometimes it is not possible.
+Metrics/MethodLength:
+  Max: 30
+
+Metrics/AbcSize:
+  Max: 30
+
+Metrics/CyclomaticComplexity:
+  Max: 10
+
+Metrics/PerceivedComplexity:
+  Max: 10
+
+Metrics/BlockLength:
+  Enabled: false
+
+# Allow curly braces for blocks that return
+BlockDelimiters:
+  EnforcedStyle: semantic
+  FunctionalMethods:
+    - before
+    - let
+    - let!
+    - subject
+    - watch
+    - expect
+    - sequence
+    - where
+
+# Do not enforce documentation for all class definitions
+Documentation:
+  Enabled: false
+
+# Checks that message expectations are set using spies. receive/have_received
+RSpec/MessageSpies:
+  EnforcedStyle: receive
+
+# Array of symbols is more legible than %i()
+Style/SymbolArray:
+  Enabled: false
+
+# Set max depth to 6
+RSpec/NestedGroups:
+  Max: 6
+
+# Set max length to 50 for json keys matcher
+RSpec/ExampleLength:
+  Max: 50
+
+# Allow 5 expects in examples
+RSpec/MultipleExpectations:
+  Max: 5
+
+# Allow multiline block chain
+Style/MultilineBlockChain:
+  Enabled: false
+
+# Allow Non ascii(Japanese) comment
+Style/AsciiComments:
+  Enabled: false
+
+# RSpecのDescribeにclass, module以外を指定出来るように
+RSpec/DescribeClass:
+  Enabled: false
+
+# controllerでmoduleのnestをさせたい(Hoge::Fugaのような)のでoffにする
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/MultipleExpectations:
+  Enabled: false
+
+Metrics/ClassLength:
+  Max: 200
+
+Metrics/ModuleLength:
+  Max: 200
+
+RSpec/NamedSubject:
+  Enabled: false
+
+Rails/DynamicFindBy:
+  Enabled: false
+
+Rails/UnknownEnv:
+  Environments:
+    - production
+    - staging
+    - test
+    - development
+
+RSpec/ExpectInHook:
+  Enabled: false

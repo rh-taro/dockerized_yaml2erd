@@ -1,0 +1,15 @@
+# usage
+- install docker
+	- https://docs.docker.com/install/
+- clone this repository
+	- `$ git clone git@github.com:rh-taro/yaml2erd.git`
+- move to yaml2erd directory
+	- `$ cd yaml2erd`
+- docker start
+	- `$ docker-compose build`
+	- `$ docker-compose up -d`
+- edit table.yaml
+	- `app/yaml/table.yaml`
+- exec rb script
+	- `docker-compose exec yaml2erd rails runner app/scripts/yaml_dump.rb app/yaml/table.yaml`
+- output file to erd/erd.png & erd/erd.dot

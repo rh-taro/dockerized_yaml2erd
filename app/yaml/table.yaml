@@ -1,0 +1,60 @@
+tables:
+  User:
+    columns:
+      id:
+        type: bigint(8)
+        options:
+          - primary key
+          - not null
+        logical_name: 主キー
+      name:
+        type: text
+        options:
+          - not null
+        logical_name: 名前
+      created_at:
+        type: datetime
+        options:
+          - not null
+        logical_name: 作成日時
+      updated_at:
+        type: datetime
+        options:
+          - not null
+        logical_name: 更新日時
+    relations:
+      - has_many: Post
+    description: |-
+      ユーザテーブル
+  Post:
+    columns:
+      id:
+        type: bigint(8)
+        options:
+          - primary key
+          - not null
+        logical_name: 主キー
+      title:
+        type: text
+        options:
+          - not null
+        logical_name: タイトル
+      body:
+        type: text
+        options:
+          - not null
+        logical_name: 本文
+      created_at:
+        type: datetime
+        options:
+          - not null
+        logical_name: 作成日時
+      updated_at:
+        type: datetime
+        options:
+          - not null
+        logical_name: 更新日時
+    relations:
+      - belongs_to: User
+    description: |-
+      投稿テーブル

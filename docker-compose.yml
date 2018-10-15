@@ -1,0 +1,12 @@
+version: '3'
+volumes:
+  bundle:
+services:
+  yaml2erd:
+    build: .
+    volumes:
+      - bundle:/usr/local/bundle
+      - .:/usr/src/yaml2erd:delegated
+    stdin_open: true
+    tty: true
+    command: /bin/sh -c 'bundle install; /bin/sh'
