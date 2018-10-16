@@ -2,8 +2,8 @@
 
 class YamlToErParser
   ARROW_MAP = {
-    has_many: { arrowhead: 'crow', arrowtail: 'tee', arrowsize: 5, dir: 'both', minlen: 5 },
-    has_one: { arrowhead: 'tee', arrowtail: 'tee', arrowsize: 5, dir: 'both', minlen: 5 }
+    has_many: { arrowhead: 'crow', arrowtail: 'tee', arrowsize: 5, dir: 'both', minlen: 5, penwidth: 10 },
+    has_one: { arrowhead: 'tee', arrowtail: 'tee', arrowsize: 5, dir: 'both', minlen: 5, penwidth: 10 }
   }.freeze
 
   def initialize(yaml_file_path)
