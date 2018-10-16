@@ -18,7 +18,7 @@ file_path = ARGF.read
 parser = YamlToErParser.new(file_path)
 
 # 共通設定
-parser.gviz_nodes(shape: 'Mrecord', fontname: 'DejaVu Serif', fontsize: 40)
+parser.gviz_nodes(shape: 'Mrecord', fontname: 'Noto Sans CJK JP Black', fontsize: 50)
 parser.gviz_global(layout: 'dot')
 
 # gvizへ書き出し
