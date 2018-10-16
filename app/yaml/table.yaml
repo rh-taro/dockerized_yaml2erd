@@ -74,6 +74,8 @@ tables:
           - not null
           - foreign key
         logical_name: 投稿id
+        description: |-
+          user_idのユーザがお気に入りした投稿のid
       user_id:
         type: bigint(8)
         options:
