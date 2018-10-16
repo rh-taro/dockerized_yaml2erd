@@ -11,7 +11,7 @@
 - edit table.yaml
 	- `app/yaml/table.yaml`
 - exec rb script
-	- `docker-compose exec yaml2erd rails runner app/scripts/yaml_dump.rb app/yaml/table.yaml`
+	- `$ docker-compose exec yaml2erd rails runner app/scripts/yaml_dump.rb app/yaml/table.yaml`
 - output file to `erd/erd.png` `erd/erd.dot`
 
 ## [app/yaml/table.yaml](https://github.com/rh-taro/yaml2erd/blob/b1125820236b835e4a2e461b4b205d949e2094b5/app/yaml/table.yaml)
@@ -133,3 +133,6 @@ digraph G {
   Post -> Favorite[arrowhead="crow",arrowtail="tee",arrowsize="5",dir="both",minlen="5",penwidth="10"];
 }
 ```
+
+## show usable font
+`$ docker-compose exec yaml2erd fc-list`
