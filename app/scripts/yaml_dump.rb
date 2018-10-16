@@ -5,7 +5,7 @@
 # $ docker-compose up -d
 # $ docker-compose exec yaml2erd rails runner app/scripts/yaml_dump.rb app/yaml/table.yaml
 
-# TODO: yamlの文法チェック, gem化, specでschema保証できるように
+# TODO: yamlの文法チェック, gem化, specでschema保証できるように,設定のyaml化、erdにnot null、pk、default欄追加、ciやらhookやらいい感じにプロジェクトに取り込める形を想定
 # 設計の補助ツールとして 最終的には設計から保守までずっと使えるように
 # ref: https://qiita.com/asmsuechan/items/0c943aba2ff3e06f3d98
 # ref: https://qiita.com/rubytomato@github/items/51779135bc4b77c8c20d
