@@ -4,23 +4,24 @@ tables:
       id:
         type: bigint(8)
         options:
-          - primary key
-          - not null
+          primary_key: true
+          not_null: true
         logical_name: 主キー
       name:
         type: text
         options:
-          - not null
+          not_null: true
+          default: None Name
         logical_name: 名前
       created_at:
         type: datetime
         options:
-          - not null
+          not_null: true
         logical_name: 作成日時
       updated_at:
         type: datetime
         options:
-          - not null
+          not_null: true
         logical_name: 更新日時
     relations:
       - has_many: Post
@@ -32,28 +33,28 @@ tables:
       id:
         type: bigint(8)
         options:
-          - primary key
-          - not null
+          primary_key: true
+          not_null: true
         logical_name: 主キー
       title:
         type: text
         options:
-          - not null
+          not_null: true
         logical_name: タイトル
       body:
         type: text
         options:
-          - not null
+          not_null: true
         logical_name: 本文
       created_at:
         type: datetime
         options:
-          - not null
+          not_null: true
         logical_name: 作成日時
       updated_at:
         type: datetime
         options:
-          - not null
+          not_null: true
         logical_name: 更新日時
     relations:
       - belongs_to: User
@@ -65,32 +66,32 @@ tables:
       id:
         type: bigint(8)
         options:
-          - primary key
-          - not null
+          primary_key: true
+          not_null: true
         logical_name: 主キー
       post_id:
         type: bigint(8)
         options:
-          - not null
-          - foreign key
+          not_null: true
+          foreign_key: true
         logical_name: 投稿id
         description: |-
           user_idのユーザがお気に入りした投稿のid
       user_id:
         type: bigint(8)
         options:
-          - not null
-          - foreign key
+          not_null: true
+          foreign_key: true
         logical_name: ユーザid
       created_at:
         type: datetime
         options:
-          - not null
+          not_null: true
         logical_name: 作成日時
       updated_at:
         type: datetime
         options:
-          - not null
+          not_null: true
         logical_name: 更新日時
     relations:
       - belongs_to: Post
