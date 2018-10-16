@@ -12,7 +12,7 @@
 	- `app/yaml/table.yaml`
 - exec rb script
 	- `$ docker-compose exec yaml2erd rails runner app/scripts/yaml_dump.rb app/yaml/table.yaml`
-- output file to `erd/erd.png` `erd/erd.dot`
+- output file to `erd/table.png` `erd/table.dot`
 
 ## [app/yaml/table.yaml](https://github.com/rh-taro/yaml2erd/blob/6a5a0f26ebdb775f0c1fd5b4c1b7ba629ca6b6c8/app/yaml/table.yaml)
 ```
@@ -118,10 +118,10 @@ tables:
       お気に入りテーブル
 ```
 
-## [erd/erd.png](https://github.com/rh-taro/yaml2erd/blob/8560642da386203852ca168a44089b9b206ed140/erd/erd.png)
-![erd/erd.png](https://github.com/rh-taro/yaml2erd/blob/8560642da386203852ca168a44089b9b206ed140/erd/erd.png)
+## [erd/table.png](https://github.com/rh-taro/yaml2erd/blob/b20d08eff80010cec2e1f5ff50464b92d42b2c38/erd/table.png)
+![erd/table.png](https://github.com/rh-taro/yaml2erd/blob/b20d08eff80010cec2e1f5ff50464b92d42b2c38/erd/table.png)
 
-## [erd/erd.dot](https://github.com/rh-taro/yaml2erd/blob/8560642da386203852ca168a44089b9b206ed140/erd/erd.dot)
+## [erd/table.dot](https://github.com/rh-taro/yaml2erd/blob/b20d08eff80010cec2e1f5ff50464b92d42b2c38/erd/table.dot)
 ```
 digraph G {
   layout="dot";
