@@ -6,6 +6,17 @@ class YamlToErParser
     has_one: { arrowhead: 'tee', arrowtail: 'tee', arrowsize: 5, dir: 'both', minlen: 5, penwidth: 10 }
   }.freeze
 
+  TABLE_HEADER = %w[
+    物理名
+    論理名
+    型
+    PK
+    FK
+    NOT_NULL
+    DEFAULT
+    説明
+  ].freeze
+
   def initialize(yaml_file_path)
     @yaml_data = YAML.safe_load(yaml_file_path).deep_symbolize_keys
     @gv = Gviz.new
@@ -20,23 +31,23 @@ class YamlToErParser
   end
 
   def write_erd
-    tables.each { |table|
-      table_name = get_table_name(table)
-      columns = get_columns(table)
-      relations = get_relations(table)
-      table_description = get_table_description(table)
+    db_tables.each { |table|
+      db_table_name = get_db_table_name(table)
+      db_columns = get_db_columns(table)
+      db_relations = get_db_relations(table)
+      db_table_description = get_db_table_description(table)
 
-      validate_columns!(columns)
+      validate_columns!(db_table_name, db_columns)
 
       # テーブル作成
-      @gv.add table_name
+      @gv.add db_table_name
 
       # tableタグ作成
-      table_column_body = create_table_tag(table_name, columns, table_description)
+      table_tag = create_table_tag(db_table_name, db_columns, db_table_description)
       # テーブル名+カラムのラベルのマッピング
-      @gv.node table_name, label: table_column_body
+      @gv.node db_table_name, label: table_tag
 
-      mapping_relation(table_name, relations)
+      mapping_relation(db_table_name, db_relations)
     }
   end
 
@@ -46,31 +57,97 @@ class YamlToErParser
 
   private
 
-  def tables
+  def db_tables
     @yaml_data[:tables]
   end
 
-  def get_table_name(table)
-    table[0]
+  def get_db_table_name(db_table)
+    db_table[0]
   end
 
-  def get_columns(table)
-    table[1][:columns]
+  def get_db_columns(db_table)
+    db_table[1][:columns]
   end
 
-  def get_relations(table)
-    table[1][:relations]
+  def get_db_relations(db_table)
+    db_table[1][:relations]
   end
 
-  def get_table_description(table)
-    table[1][:description]
+  def get_db_table_description(db_table)
+    db_table[1][:description]
   end
 
-  def validate_columns!(columns)
+  def validate_columns!(db_table_name, db_columns)
     # ささやかなバリデーション
-    return if columns.class == Hash
-    p "#{table[0]} columns error"
+    return if db_columns.class == Hash
+    p "#{db_table_name} columns error"
     exit
+  end
+
+  def create_table_tag(db_table_name, db_columns, db_table_description)
+    table_tag = "<table border='0' cellborder='1' cellpadding='8'>"
+
+    # DBのテーブル名
+    table_tag += "<tr><td bgcolor='lightblue' colspan='#{TABLE_HEADER.size}'>#{db_table_name}</td></tr>"
+    # ヘッダ(TABLE_HEADERから生成)
+    table_tag += create_table_header
+    # ボディ(DBのテーブルの各カラムのデータ)
+    table_tag += create_table_body(db_columns)
+    # フッタ
+    table_tag += "<tr><td bgcolor='lightblue' colspan='#{TABLE_HEADER.size}'>#{nl2br(db_table_description)}</td></tr>"
+
+    table_tag += '</table>'
+    table_tag
+  end
+
+  def create_table_header
+    table_header = '<tr>'
+    TABLE_HEADER.each do |head|
+      table_header += "<td bgcolor='lightblue'>#{head}</td>"
+    end
+    table_header += '</tr>'
+    table_header
+  end
+
+  def create_table_body(db_columns)
+    table_body = ''
+    db_columns.each do |db_column, db_column_info|
+      db_column_logical_name = db_column_info[:logical_name].presence || ''
+      db_column_description = db_column_info[:description].presence || ''
+      db_column_options = db_column_info[:options].presence || {}
+
+      # 表示する値とalignの指定
+      table_columns = [
+        { val: db_column,                                             align: :left },
+        { val: db_column_logical_name,                                align: :left },
+        { val: db_column_info[:type],                                 align: :left },
+        { val: convert_check_mark(db_column_options[:primary_key]),   align: :center },
+        { val: convert_check_mark(db_column_options[:foreign_key]),   align: :center },
+        { val: convert_check_mark(db_column_options[:not_null]),      align: :center },
+        { val: db_column_options[:default],                           align: :left },
+        { val: nl2br(db_column_description),                          align: :left }
+      ]
+
+      table_body += create_table_line(table_columns)
+    end
+    table_body
+  end
+
+  def convert_check_mark(val)
+    val.present? ? '✔︎' : ''
+  end
+
+  def nl2br(str)
+    str.gsub(/\r\n|\r|\n/, '<br />')
+  end
+
+  def create_table_line(table_columns)
+    table_line = '<tr>'
+    table_columns.each do |table_column|
+      table_line += "<td align='#{table_column[:align]}'>#{table_column[:val]}</td>" \
+    end
+    table_line += '</tr>'
+    table_line
   end
 
   def mapping_relation(table_name, relations)
@@ -82,34 +159,5 @@ class YamlToErParser
         @gv.edge "#{table_name}_#{rel_table}", ARROW_MAP[rel_type]
       end
     end
-  end
-
-  def create_table_tag(table_name, columns, table_description)
-    # テーブル名+カラムの構成
-    table_column_body = "<table border='0' cellborder='1' cellpadding='8'>"
-    table_column_body += "<tr><td bgcolor='lightblue' colspan='4'>#{table_name}</td></tr>"
-    table_column_body +=
-      '<tr>' \
-      "<td bgcolor='lightblue'>物理名</td>" \
-      "<td bgcolor='lightblue'>論理名</td>" \
-      "<td bgcolor='lightblue'>型</td>" \
-      "<td bgcolor='lightblue'>説明</td>" \
-      '</tr>'
-
-    columns.each do |column, column_info|
-      column_logical_name = column_info[:logical_name].presence || ''
-      column_description = column_info[:description].presence || ''
-
-      table_column_body +=
-        '<tr>' \
-        "<td align='left'>#{column}</td>" \
-        "<td align='left'>#{column_logical_name}</td>" \
-        "<td align='left'>#{column_info[:type]}</td>" \
-        "<td align='left'>#{column_description.gsub(/\r\n|\r|\n/, '<br />')}</td>" \
-        '</tr>'
-    end
-
-    table_column_body += "<tr><td bgcolor='lightblue' colspan='4'>#{table_description.gsub(/\r\n|\r|\n/, '<br />')}</td></tr>"
-    table_column_body += '</table>'
   end
 end
