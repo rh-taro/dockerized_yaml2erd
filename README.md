@@ -14,7 +14,7 @@
 	- `$ docker-compose exec yaml2erd rails runner app/scripts/yaml_dump.rb app/yaml/table.yaml`
 - output file to `erd/erd.png` `erd/erd.dot`
 
-## [app/yaml/table.yaml](https://github.com/rh-taro/yaml2erd/blob/b1125820236b835e4a2e461b4b205d949e2094b5/app/yaml/table.yaml)
+## [app/yaml/table.yaml](https://github.com/rh-taro/yaml2erd/blob/6a5a0f26ebdb775f0c1fd5b4c1b7ba629ca6b6c8/app/yaml/table.yaml)
 ```
 tables:
   User:
