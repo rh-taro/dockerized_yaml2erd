@@ -18,7 +18,10 @@ class YamlToErParser
   ].freeze
 
   def initialize(yaml_file_path)
-    @yaml_data = YAML.safe_load(yaml_file_path).deep_symbolize_keys
+    @yaml_file_path = yaml_file_path
+    File.open(@yaml_file_path) do |file|
+      @yaml_data = YAML.safe_load(file.read).deep_symbolize_keys
+    end
     @gv = Gviz.new
   end
 
@@ -51,11 +54,18 @@ class YamlToErParser
     }
   end
 
-  def file_save(file_path, file_ext)
-    @gv.save file_path, file_ext
+  def file_save(save_path = '', save_ext = '')
+    save_path = save_path.presence || "erd/#{remove_ext(@yaml_file_path)}"
+    save_ext = save_ext.presence || :png
+
+    @gv.save save_path, save_ext
   end
 
   private
+
+  def remove_ext(file_name)
+    File.basename(file_name, '.*')
+  end
 
   def db_tables
     @yaml_data[:tables]
