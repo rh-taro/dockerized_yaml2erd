@@ -66,7 +66,7 @@ class YamlToErParser
     relation_grouping
   end
 
-  def file_save(save_path = '', save_ext = '')
+  def file_save(save_path: '', save_ext: '')
     save_path = save_path.presence || "erd/#{remove_ext(@yaml_file_path)}"
     save_ext = save_ext.presence || :png
 
