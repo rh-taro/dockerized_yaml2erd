@@ -1,3 +1,9 @@
+groups:
+  - name: ユーザ
+    bgcolor: '#9cf5b7'
+  - name: 投稿
+    bgcolor: '#bcdbf7'
+
 tables:
   User:
     columns:
@@ -23,6 +29,7 @@ tables:
         options:
           not_null: true
         logical_name: 更新日時
+    group: ユーザ
     relations:
       - has_many: Post
       - has_many: Favorite
@@ -56,6 +63,7 @@ tables:
         options:
           not_null: true
         logical_name: 更新日時
+    group: 投稿
     relations:
       - belongs_to: User
       - has_many: Favorite
