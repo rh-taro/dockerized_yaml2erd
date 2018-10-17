@@ -1,19 +1,35 @@
 # usage
-- install docker
-	- https://docs.docker.com/install/
-- clone this repository
-	- `$ git clone git@github.com:rh-taro/yaml2erd.git`
-- move to yaml2erd directory
-	- `$ cd yaml2erd`
-- docker start
-	- `$ docker-compose build`
-	- `$ docker-compose up -d`
-- edit table.yaml
-	- `app/yaml/table.yaml`
-- exec rb script
-	- `$ docker-compose exec yaml2erd rails runner app/scripts/yaml_dump.rb app/yaml/table.yaml`
-- output file to `erd/table.png` `erd/table.dot`
+## install docker
+https://docs.docker.com/install/
 
+## clone this repository
+```
+$ git clone git@github.com:rh-taro/yaml2erd.git
+```
+
+## move to yaml2erd directory
+```
+$ cd yaml2erd
+```
+
+## start up docker 
+```
+$ docker-compose build
+$ docker-compose up -d
+```
+
+## edit or create yaml
+edit `app/yaml/table.yaml` or create new yaml
+
+## exec rb script
+```
+$ docker-compose exec yaml2erd rails runner app/scripts/yaml_dump.rb app/yaml/table.yaml
+```
+## outputed file to
+- `erd/table.png`
+- `erd/table.dot`
+
+# Sample
 ## [app/yaml/table.yaml](https://github.com/rh-taro/yaml2erd/blob/01471477832562b7c15f182c5324f1e02de5d5f2/app/yaml/table.yaml)
 ```
 groups:
