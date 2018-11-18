@@ -1,6 +1,6 @@
-# frozen_string_literal: true
+require 'er_yaml_parser'
 
-class YamlToErParser
+class Yaml2Erd
   attr_accessor :subgraph_global_conf
 
   ARROW_MAP = {
@@ -20,10 +20,7 @@ class YamlToErParser
   ].freeze
 
   def initialize(yaml_file_path)
-    @yaml_file_path = yaml_file_path
-    File.open(@yaml_file_path) do |file|
-      @yaml_data = YAML.safe_load(file.read).deep_symbolize_keys
-    end
+    @yaml = ErYamlParser.new(yaml_file_path)
     @gv = Gviz.new
 
     @subgraph_global_conf = {}
@@ -42,24 +39,23 @@ class YamlToErParser
 
   def write_erd
     # entityとrelation作成
-    db_tables.each do |table|
-      db_table_name = get_db_table_name(table)
-      db_columns = get_db_columns(table)
-      db_relations = get_db_relations(table)
-      db_table_description = get_db_table_description(table)
+    @yaml.model_list.each do |model|
+      columns = @yaml.models[model].columns
+      relations = @yaml.models[model].relations
+      description = @yaml.models[model].description
 
-      validate_columns!(db_table_name, db_columns)
+      validate_columns!(model, columns)
 
       # テーブル作成
       # TODO: addとrouteの違い
-      @gv.route db_table_name
+      @gv.route model
 
       # tableタグ作成
-      table_tag = create_table_tag(db_table_name, db_columns, db_table_description)
+      table_tag = create_table_tag(model, columns, description)
       # テーブル名+カラムのラベルのマッピング
-      @gv.node db_table_name, label: table_tag
+      @gv.node model, label: table_tag
 
-      mapping_relation(db_table_name, db_relations)
+      mapping_relation(model, relations)
     end
 
     # グルーピング
@@ -67,7 +63,7 @@ class YamlToErParser
   end
 
   def file_save(save_path: '', save_ext: '')
-    save_path = save_path.presence || "erd/#{remove_ext(@yaml_file_path)}"
+    save_path = save_path.presence || "erd/#{remove_ext(@yaml.yaml_file_path)}"
     save_ext = save_ext.presence || :png
 
     @gv.save save_path, save_ext
@@ -82,32 +78,34 @@ class YamlToErParser
     group_bgcolor_map = create_group_bgcolor_map
 
     # mapをもとにグルーピング
-    db_table_groups_map.each do |group_name, db_tables|
+    db_table_groups_map.each do |group_name, models|
       @gv.subgraph do
         global subgrap_conf.merge(label: group_name, bgcolor: group_bgcolor_map[group_name.to_sym])
         nodes nodes_conf
-        db_tables.each do |db_table|
-          node db_table
+        models.each do |model|
+          node model
         end
       end
     end
   end
 
+  # TODO: yaml側かYamlModel側でparseを検討
   def db_table_groups_map
     # グルーピングのmap作成
     db_table_groups_map = {}
-    db_tables.each do |table|
-      db_table_group_name = get_db_table_group_name(table)
-      db_table_name = get_db_table_name(table)
+    @yaml.model_list.each do |model|
+      group_name = @yaml.models[model].group_name
 
-      next if db_table_group_name.blank?
+      next if group_name.blank?
+
+      group_name = group_name.to_sym
 
       # TODO: 複数指定で重ねたり、入れ子にしたりできるように
       # {:group_name => [table_name1, ...]}というhashを作る
-      db_table_group_name = db_table_group_name.to_sym
+
       # なければ初期化
-      db_table_groups_map[db_table_group_name] = [] if db_table_groups_map[db_table_group_name].blank?
-      db_table_groups_map[db_table_group_name] << db_table_name
+      db_table_groups_map[group_name] = [] if db_table_groups_map[group_name].blank?
+      db_table_groups_map[group_name] << model
     end
     db_table_groups_map
   end
@@ -116,36 +114,13 @@ class YamlToErParser
     File.basename(file_name, '.*')
   end
 
+  # TODO: ErYamlParser側での対応検討
   def create_group_bgcolor_map
     bgcolor_map = {}
-    @yaml_data[:groups].each do |group|
+    @yaml.groups.each do |group|
       bgcolor_map[group[:name].to_sym] = group[:bgcolor]
     end
     bgcolor_map
-  end
-
-  def db_tables
-    @yaml_data[:tables]
-  end
-
-  def get_db_table_name(db_table)
-    db_table[0]
-  end
-
-  def get_db_columns(db_table)
-    db_table[1][:columns]
-  end
-
-  def get_db_relations(db_table)
-    db_table[1][:relations]
-  end
-
-  def get_db_table_group_name(db_table)
-    db_table[1][:group]
-  end
-
-  def get_db_table_description(db_table)
-    db_table[1][:description]
   end
 
   def validate_columns!(db_table_name, db_columns)
@@ -205,6 +180,7 @@ class YamlToErParser
   end
 
   def convert_check_mark(val)
+    # 指定なし/指定ありtrue/指定ありfalseを考慮
     val.present? ? '✔︎' : ''
   end
 
@@ -221,13 +197,13 @@ class YamlToErParser
     table_line
   end
 
-  def mapping_relation(table_name, relations)
+  def mapping_relation(model, relations)
     # リレーションのマッピング
     return if relations.blank?
     relations.each do |relation|
-      relation.each do |rel_type, rel_table|
+      relation.each do |rel_type, rel_model|
         next if rel_type == :belongs_to
-        @gv.edge "#{table_name}_#{rel_table}", ARROW_MAP[rel_type]
+        @gv.edge "#{model}_#{rel_model}", ARROW_MAP[rel_type]
       end
     end
   end

@@ -13,10 +13,10 @@
 # ref: https://teratail.com/questions/126320
 # ref: https://renenyffenegger.ch/notes/tools/Graphviz/examples/index
 
-require './lib/yaml_to_er_parser.rb'
+require './lib/yaml_2_erd.rb'
 
 file_path = ARGF.filename
-parser = YamlToErParser.new(file_path)
+parser = Yaml2Erd.new(file_path)
 
 # 共通設定
 parser.gviz_nodes(shape: 'Mrecord', fontname: 'Noto Sans CJK JP Black', fontsize: 50)
