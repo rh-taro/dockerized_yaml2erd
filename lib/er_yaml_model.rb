@@ -14,7 +14,7 @@ class ErYamlModel
   end
 
   def relations
-    # TODO: has_manyを取りまとめる形の方がいいかも yamlの構造を変えるかここで変換するか
+    # TODO: 同じassociationのtypeまとめる形の方がいいかも yamlの構造を変えるかここで変換するか
     @yaml_model[:relations]
   end
 
