@@ -47,7 +47,7 @@ groups:
   - name: 投稿
     bgcolor: '#bcdbf7'
 
-tables:
+models:
   User:
     columns:
       id:
