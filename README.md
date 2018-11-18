@@ -4,12 +4,12 @@ https://docs.docker.com/install/
 
 ## clone this repository
 ```
-$ git clone git@github.com:rh-taro/yaml2erd.git
+$ git clone git@github.com:rh-taro/dockerized_yaml2erd.git
 ```
 
 ## move to yaml2erd directory
 ```
-$ cd yaml2erd
+$ cd dockerized_yaml2erd
 ```
 
 ## start up docker 
@@ -30,7 +30,7 @@ $ docker-compose exec yaml2erd rails runner app/scripts/yaml_dump.rb app/yaml/ta
 - `erd/table.dot`
 
 # Sample
-## [app/yaml/table.yaml](https://github.com/rh-taro/yaml2erd/blob/01471477832562b7c15f182c5324f1e02de5d5f2/app/yaml/table.yaml)
+## [app/yaml/table.yaml](https://github.com/rh-taro/dockerized_yaml2erd/blob/01471477832562b7c15f182c5324f1e02de5d5f2/app/yaml/table.yaml)
 ```
 groups:
   - name: ユーザ
@@ -190,10 +190,10 @@ tables:
 
 ```
 
-## [erd/table.png](https://github.com/rh-taro/yaml2erd/blob/67ce85e1b5ddb78968f107fad526ac3beec1bc73/erd/table.png)
-![erd/table.png](https://github.com/rh-taro/yaml2erd/blob/67ce85e1b5ddb78968f107fad526ac3beec1bc73/erd/table.png)
+## [erd/table.png](https://github.com/rh-taro/dockerized_yaml2erd/blob/67ce85e1b5ddb78968f107fad526ac3beec1bc73/erd/table.png)
+![erd/table.png](https://github.com/rh-taro/dockerized_yaml2erd/blob/67ce85e1b5ddb78968f107fad526ac3beec1bc73/erd/table.png)
 
-## [erd/table.dot](https://github.com/rh-taro/yaml2erd/blob/67ce85e1b5ddb78968f107fad526ac3beec1bc73/erd/table.dot)
+## [erd/table.dot](https://github.com/rh-taro/dockerized_yaml2erd/blob/67ce85e1b5ddb78968f107fad526ac3beec1bc73/erd/table.dot)
 ```
 digraph G {
   subgraph cluster0 {
