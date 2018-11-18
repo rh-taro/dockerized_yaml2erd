@@ -46,20 +46,20 @@ class Yaml2Erd
 
       validate_columns!(model, columns)
 
-      # テーブル作成
-      # TODO: addとrouteの違い
+      # TODO: addとrouteの違いはなんだろう
+      # entityの枠(model)作成
       @gv.route model
 
-      # tableタグ作成
+      # entityの中身(tableタグ)作成、適用
       table_tag = create_table_tag(model, columns, description)
-      # テーブル名+カラムのラベルのマッピング
       @gv.node model, label: table_tag
 
-      mapping_relation(model, relations)
+      # relation適用
+      apply_relation(model, relations)
     end
 
-    # グルーピング
-    relation_grouping
+    # group適用
+    apply_grouping
   end
 
   def file_save(save_path: '', save_ext: '')
@@ -70,58 +70,6 @@ class Yaml2Erd
   end
 
   private
-
-  def relation_grouping
-    # グループ内に適用するために再度@nodes_confをあてる
-    nodes_conf = @nodes_conf
-    subgrap_conf = @subgraph_global_conf
-    group_bgcolor_map = create_group_bgcolor_map
-
-    # mapをもとにグルーピング
-    db_table_groups_map.each do |group_name, models|
-      @gv.subgraph do
-        global subgrap_conf.merge(label: group_name, bgcolor: group_bgcolor_map[group_name.to_sym])
-        nodes nodes_conf
-        models.each do |model|
-          node model
-        end
-      end
-    end
-  end
-
-  # TODO: yaml側かYamlModel側でparseを検討
-  def db_table_groups_map
-    # グルーピングのmap作成
-    db_table_groups_map = {}
-    @yaml.model_list.each do |model|
-      group_name = @yaml.models[model].group_name
-
-      next if group_name.blank?
-
-      group_name = group_name.to_sym
-
-      # TODO: 複数指定で重ねたり、入れ子にしたりできるように
-      # {:group_name => [table_name1, ...]}というhashを作る
-
-      # なければ初期化
-      db_table_groups_map[group_name] = [] if db_table_groups_map[group_name].blank?
-      db_table_groups_map[group_name] << model
-    end
-    db_table_groups_map
-  end
-
-  def remove_ext(file_name)
-    File.basename(file_name, '.*')
-  end
-
-  # TODO: ErYamlParser側での対応検討
-  def create_group_bgcolor_map
-    bgcolor_map = {}
-    @yaml.groups.each do |group|
-      bgcolor_map[group[:name].to_sym] = group[:bgcolor]
-    end
-    bgcolor_map
-  end
 
   def validate_columns!(db_table_name, db_columns)
     # ささやかなバリデーション
@@ -180,7 +128,7 @@ class Yaml2Erd
   end
 
   def convert_check_mark(val)
-    # 指定なし/指定ありtrue/指定ありfalseを考慮
+    # TODO: 指定なし/指定ありtrue/指定ありfalseを考慮
     val.present? ? '✔︎' : ''
   end
 
@@ -197,7 +145,7 @@ class Yaml2Erd
     table_line
   end
 
-  def mapping_relation(model, relations)
+  def apply_relation(model, relations)
     # リレーションのマッピング
     return if relations.blank?
     relations.each do |relation|
@@ -206,5 +154,29 @@ class Yaml2Erd
         @gv.edge "#{model}_#{rel_model}", ARROW_MAP[rel_type]
       end
     end
+  end
+
+  def apply_grouping
+    # グループ内に適用するために再度@nodes_confをあてる
+    nodes_conf = @nodes_conf
+    subgrap_conf = @subgraph_global_conf
+
+    # mapをもとにグルーピング
+    @yaml.groups_map.each do |group_name, models|
+      group_bgcolor = @yaml.groups_bgcolor_map[group_name.to_sym]
+
+      @gv.subgraph do
+        global subgrap_conf.merge(label: group_name, bgcolor: group_bgcolor)
+        nodes nodes_conf
+        # model割り当て
+        models.each do |model|
+          node model
+        end
+      end
+    end
+  end
+
+  def remove_ext(file_name)
+    File.basename(file_name, '.*')
   end
 end
