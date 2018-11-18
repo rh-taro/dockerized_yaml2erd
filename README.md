@@ -21,22 +21,29 @@ $ docker-compose up -d
 ## edit or create yaml
 edit `app/yaml/table.yaml` or create new yaml
 
-## exec rb script with default conf
+## exec rb script (default conf & default output path)
 ```
 $ docker-compose exec yaml2erd rails runner app/scripts/yaml_dump.rb app/yaml/table.yaml
 ```
 
-## exec rb script with custom conf
+## exec rb script with custom conf(-c option)
 ```
-$ docker-compose exec yaml2erd rails runner app/scripts/yaml_dump.rb app/yaml/table.yaml config/gv_conf.yaml
+$ docker-compose exec yaml2erd rails runner app/scripts/yaml_dump.rb app/yaml/table.yaml -c config/gv_conf.yaml
 ```
 If you write in the config file you can change the setting
 
 It is also possible to write only a part
 
-## outputed file to
+## exec rb script with custom output path(-o option)
+```
+$ docker-compose exec yaml2erd rails runner app/scripts/yaml_dump.rb app/yaml/table.yaml -o custom/custom.png
+```
+
+## default outputed path
 - `erd/table.png`
 - `erd/table.dot`
+
+outputed file name is same as DB definiton yaml file name
 
 # Sample
 ## [app/yaml/table.yaml](https://github.com/rh-taro/dockerized_yaml2erd/blob/01471477832562b7c15f182c5324f1e02de5d5f2/app/yaml/table.yaml)

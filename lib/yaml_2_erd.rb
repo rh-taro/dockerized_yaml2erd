@@ -68,11 +68,18 @@ class Yaml2Erd
     apply_grouping
   end
 
-  def file_save(save_path: '', save_ext: '')
-    save_path = save_path.presence || "erd/#{remove_ext(@yaml.yaml_file_path)}"
-    save_ext = save_ext.presence || :png
+  def file_save(save_path: '')
+    ext = :png
+    dir = 'erd'
+    filename = remove_ext(@yaml.yaml_file_path)
 
-    @gv.save save_path, save_ext
+    if save_path.present?
+      dir = File.dirname(save_path)
+      filename = remove_ext(save_path)
+      ext = File.extname(save_path).slice!(1..-1)
+    end
+
+    @gv.save "#{dir}/#{filename}", ext
   end
 
   private
