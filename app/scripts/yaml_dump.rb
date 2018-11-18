@@ -20,4 +20,4 @@ parser = Yaml2Erd.new(ARGV[0], ARGV[1])
 # gvizへ書き出し
 parser.write_erd
 # 保存
-parser.file_save
+parser.file_save(save_path: ARGV[2])
