@@ -15,7 +15,7 @@
 
 require './lib/yaml_2_erd.rb'
 
-parser = Yaml2Erd.new(ARGF.filename)
+parser = Yaml2Erd.new(ARGV[0], ARGV[1])
 # gvizへ書き出し
 parser.write_erd
 # 保存

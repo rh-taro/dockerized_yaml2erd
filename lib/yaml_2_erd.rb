@@ -36,15 +36,11 @@ class Yaml2Erd
   }.freeze
 
   # TODO: nodesとglobalの違いみたいなの調査
-  def initialize(yaml_file_path)
+  def initialize(yaml_file_path, conf_yaml_path)
     @yaml = ErYamlParser.new(yaml_file_path)
     @gv = Gviz.new
 
-    @group_global_conf = DEFAULT_CONF[:group_conf]
-    @nodes_conf = DEFAULT_CONF[:entity_conf]
-
-    @gv.global DEFAULT_CONF[:global_conf]
-    @gv.nodes @nodes_conf
+    apply_conf(conf_yaml_path)
   end
 
   def write_erd
@@ -80,6 +76,34 @@ class Yaml2Erd
   end
 
   private
+
+  def apply_conf(conf_yaml_path)
+    conf = DEFAULT_CONF
+    custom_conf = {}
+    if conf_yaml_path.present?
+      File.open(conf_yaml_path) do |file|
+        custom_conf = YAML.safe_load(file.read).deep_symbolize_keys
+      end
+    end
+
+    # DEFAULT_CONFとキー重複しているものだけ適用
+    custom_conf.each do |custom_key, custom_details|
+      if conf.keys.include?(custom_key)
+        custom_details.each do |custom_detail_key, custom_val|
+          if conf[custom_key].keys.include?(custom_detail_key)
+            conf[custom_key][custom_detail_key] = custom_val
+          end
+        end
+      end
+    end
+
+    # 適用
+    @group_global_conf = conf[:group_conf]
+    @nodes_conf = conf[:entity_conf]
+
+    @gv.global conf[:global_conf]
+    @gv.nodes @nodes_conf
+  end
 
   def validate_columns!(db_table_name, db_columns)
     # ささやかなバリデーション
