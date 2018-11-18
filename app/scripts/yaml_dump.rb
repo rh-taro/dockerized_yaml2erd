@@ -15,16 +15,8 @@
 
 require './lib/yaml_2_erd.rb'
 
-file_path = ARGF.filename
-parser = Yaml2Erd.new(file_path)
-
-# 共通設定
-parser.gviz_nodes(shape: 'Mrecord', fontname: 'Noto Sans CJK JP Black', fontsize: 50)
-parser.gviz_global(layout: 'dot')
-parser.subgraph_global_conf = { shape: 'Mrecord', fontname: 'Noto Sans CJK JP Black', fontsize: 120 }
-
+parser = Yaml2Erd.new(ARGF.filename)
 # gvizへ書き出し
 parser.write_erd
-
 # 保存
 parser.file_save

@@ -1,7 +1,7 @@
 require 'er_yaml_parser'
 
 class Yaml2Erd
-  attr_accessor :subgraph_global_conf
+  attr_accessor :group_global_conf
 
   ARROW_MAP = {
     has_many: { arrowhead: 'crow', arrowtail: 'tee', arrowsize: 5, dir: 'both', minlen: 5, penwidth: 10 },
@@ -19,21 +19,31 @@ class Yaml2Erd
     説明
   ].freeze
 
+  DEFAULT_CONF = {
+    global_conf: {
+      layout: 'dot'
+    },
+    entity_conf: {
+      shape: 'Mrecord',
+      fontname: 'Noto Sans CJK JP Black',
+      fontsize: 50
+    },
+    group_conf: {
+      shape: 'Mrecord',
+      fontname: 'Noto Sans CJK JP Black',
+      fontsize: 120
+    }
+  }.freeze
+
+  # TODO: nodesとglobalの違いみたいなの調査
   def initialize(yaml_file_path)
     @yaml = ErYamlParser.new(yaml_file_path)
     @gv = Gviz.new
 
-    @subgraph_global_conf = {}
-  end
+    @group_global_conf = DEFAULT_CONF[:group_conf]
+    @nodes_conf = DEFAULT_CONF[:entity_conf]
 
-  # TODO: nodesとglobalの違いみたいなの調査
-  def gviz_global(conf)
-    @global_conf = conf
-    @gv.global @global_conf
-  end
-
-  def gviz_nodes(conf)
-    @nodes_conf = conf
+    @gv.global DEFAULT_CONF[:global_conf]
     @gv.nodes @nodes_conf
   end
 
@@ -159,14 +169,14 @@ class Yaml2Erd
   def apply_grouping
     # グループ内に適用するために再度@nodes_confをあてる
     nodes_conf = @nodes_conf
-    subgrap_conf = @subgraph_global_conf
+    group_conf = @group_global_conf
 
     # mapをもとにグルーピング
     @yaml.groups_map.each do |group_name, models|
       group_bgcolor = @yaml.groups_bgcolor_map[group_name.to_sym]
 
       @gv.subgraph do
-        global subgrap_conf.merge(label: group_name, bgcolor: group_bgcolor)
+        global group_conf.merge(label: group_name, bgcolor: group_bgcolor)
         nodes nodes_conf
         # model割り当て
         models.each do |model|
