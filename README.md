@@ -7,7 +7,7 @@ https://docs.docker.com/install/
 $ git clone git@github.com:rh-taro/dockerized_yaml2erd.git
 ```
 
-## move to yaml2erd directory
+## move to dockerized_yaml2erd directory
 ```
 $ cd dockerized_yaml2erd
 ```
@@ -21,10 +21,19 @@ $ docker-compose up -d
 ## edit or create yaml
 edit `app/yaml/table.yaml` or create new yaml
 
-## exec rb script
+## exec rb script with default conf
 ```
 $ docker-compose exec yaml2erd rails runner app/scripts/yaml_dump.rb app/yaml/table.yaml
 ```
+
+## exec rb script with custom conf
+```
+$ docker-compose exec yaml2erd rails runner app/scripts/yaml_dump.rb app/yaml/table.yaml config/gv_conf.yaml
+```
+If you write in the config file you can change the setting
+
+It is also possible to write only a part
+
 ## outputed file to
 - `erd/table.png`
 - `erd/table.dot`

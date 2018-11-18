@@ -1,7 +1,7 @@
-# frozen_string_literal: true
+require 'er_yaml_parser'
 
-class YamlToErParser
-  attr_accessor :subgraph_global_conf
+class Yaml2Erd
+  attr_accessor :group_global_conf
 
   ARROW_MAP = {
     has_many: { arrowhead: 'crow', arrowtail: 'tee', arrowsize: 5, dir: 'both', minlen: 5, penwidth: 10 },
@@ -19,55 +19,57 @@ class YamlToErParser
     説明
   ].freeze
 
-  def initialize(yaml_file_path)
-    @yaml_file_path = yaml_file_path
-    File.open(@yaml_file_path) do |file|
-      @yaml_data = YAML.safe_load(file.read).deep_symbolize_keys
-    end
-    @gv = Gviz.new
-
-    @subgraph_global_conf = {}
-  end
+  DEFAULT_CONF = {
+    global_conf: {
+      layout: 'dot'
+    },
+    entity_conf: {
+      shape: 'Mrecord',
+      fontname: 'Noto Sans CJK JP Black',
+      fontsize: 50
+    },
+    group_conf: {
+      shape: 'Mrecord',
+      fontname: 'Noto Sans CJK JP Black',
+      fontsize: 120
+    }
+  }.freeze
 
   # TODO: nodesとglobalの違いみたいなの調査
-  def gviz_global(conf)
-    @global_conf = conf
-    @gv.global @global_conf
-  end
+  def initialize(yaml_file_path, conf_yaml_path)
+    @yaml = ErYamlParser.new(yaml_file_path)
+    @gv = Gviz.new
 
-  def gviz_nodes(conf)
-    @nodes_conf = conf
-    @gv.nodes @nodes_conf
+    apply_conf(conf_yaml_path)
   end
 
   def write_erd
     # entityとrelation作成
-    db_tables.each do |table|
-      db_table_name = get_db_table_name(table)
-      db_columns = get_db_columns(table)
-      db_relations = get_db_relations(table)
-      db_table_description = get_db_table_description(table)
+    @yaml.model_list.each do |model|
+      columns = @yaml.models[model].columns
+      relations = @yaml.models[model].relations
+      description = @yaml.models[model].description
 
-      validate_columns!(db_table_name, db_columns)
+      validate_columns!(model, columns)
 
-      # テーブル作成
-      # TODO: addとrouteの違い
-      @gv.route db_table_name
+      # TODO: addとrouteの違いはなんだろう
+      # entityの枠(model)作成
+      @gv.route model
 
-      # tableタグ作成
-      table_tag = create_table_tag(db_table_name, db_columns, db_table_description)
-      # テーブル名+カラムのラベルのマッピング
-      @gv.node db_table_name, label: table_tag
+      # entityの中身(tableタグ)作成、適用
+      table_tag = create_table_tag(model, columns, description)
+      @gv.node model, label: table_tag
 
-      mapping_relation(db_table_name, db_relations)
+      # relation適用
+      apply_relation(model, relations)
     end
 
-    # グルーピング
-    relation_grouping
+    # group適用
+    apply_grouping
   end
 
   def file_save(save_path: '', save_ext: '')
-    save_path = save_path.presence || "erd/#{remove_ext(@yaml_file_path)}"
+    save_path = save_path.presence || "erd/#{remove_ext(@yaml.yaml_file_path)}"
     save_ext = save_ext.presence || :png
 
     @gv.save save_path, save_ext
@@ -75,77 +77,32 @@ class YamlToErParser
 
   private
 
-  def relation_grouping
-    # グループ内に適用するために再度@nodes_confをあてる
-    nodes_conf = @nodes_conf
-    subgrap_conf = @subgraph_global_conf
-    group_bgcolor_map = create_group_bgcolor_map
+  def apply_conf(conf_yaml_path)
+    conf = DEFAULT_CONF
+    custom_conf = {}
+    if conf_yaml_path.present?
+      File.open(conf_yaml_path) do |file|
+        custom_conf = YAML.safe_load(file.read).deep_symbolize_keys
+      end
+    end
 
-    # mapをもとにグルーピング
-    db_table_groups_map.each do |group_name, db_tables|
-      @gv.subgraph do
-        global subgrap_conf.merge(label: group_name, bgcolor: group_bgcolor_map[group_name.to_sym])
-        nodes nodes_conf
-        db_tables.each do |db_table|
-          node db_table
+    # DEFAULT_CONFとキー重複しているものだけ適用
+    custom_conf.each do |custom_key, custom_details|
+      if conf.keys.include?(custom_key)
+        custom_details.each do |custom_detail_key, custom_val|
+          if conf[custom_key].keys.include?(custom_detail_key)
+            conf[custom_key][custom_detail_key] = custom_val
+          end
         end
       end
     end
-  end
 
-  def db_table_groups_map
-    # グルーピングのmap作成
-    db_table_groups_map = {}
-    db_tables.each do |table|
-      db_table_group_name = get_db_table_group_name(table)
-      db_table_name = get_db_table_name(table)
+    # 適用
+    @group_global_conf = conf[:group_conf]
+    @nodes_conf = conf[:entity_conf]
 
-      next if db_table_group_name.blank?
-
-      # TODO: 複数指定で重ねたり、入れ子にしたりできるように
-      # {:group_name => [table_name1, ...]}というhashを作る
-      db_table_group_name = db_table_group_name.to_sym
-      # なければ初期化
-      db_table_groups_map[db_table_group_name] = [] if db_table_groups_map[db_table_group_name].blank?
-      db_table_groups_map[db_table_group_name] << db_table_name
-    end
-    db_table_groups_map
-  end
-
-  def remove_ext(file_name)
-    File.basename(file_name, '.*')
-  end
-
-  def create_group_bgcolor_map
-    bgcolor_map = {}
-    @yaml_data[:groups].each do |group|
-      bgcolor_map[group[:name].to_sym] = group[:bgcolor]
-    end
-    bgcolor_map
-  end
-
-  def db_tables
-    @yaml_data[:tables]
-  end
-
-  def get_db_table_name(db_table)
-    db_table[0]
-  end
-
-  def get_db_columns(db_table)
-    db_table[1][:columns]
-  end
-
-  def get_db_relations(db_table)
-    db_table[1][:relations]
-  end
-
-  def get_db_table_group_name(db_table)
-    db_table[1][:group]
-  end
-
-  def get_db_table_description(db_table)
-    db_table[1][:description]
+    @gv.global conf[:global_conf]
+    @gv.nodes @nodes_conf
   end
 
   def validate_columns!(db_table_name, db_columns)
@@ -205,6 +162,7 @@ class YamlToErParser
   end
 
   def convert_check_mark(val)
+    # TODO: 指定なし/指定ありtrue/指定ありfalseを考慮
     val.present? ? '✔︎' : ''
   end
 
@@ -221,14 +179,38 @@ class YamlToErParser
     table_line
   end
 
-  def mapping_relation(table_name, relations)
+  def apply_relation(model, relations)
     # リレーションのマッピング
     return if relations.blank?
     relations.each do |relation|
-      relation.each do |rel_type, rel_table|
+      relation.each do |rel_type, rel_model|
         next if rel_type == :belongs_to
-        @gv.edge "#{table_name}_#{rel_table}", ARROW_MAP[rel_type]
+        @gv.edge "#{model}_#{rel_model}", ARROW_MAP[rel_type]
       end
     end
+  end
+
+  def apply_grouping
+    # グループ内に適用するために再度@nodes_confをあてる
+    nodes_conf = @nodes_conf
+    group_conf = @group_global_conf
+
+    # mapをもとにグルーピング
+    @yaml.groups_map.each do |group_name, models|
+      group_bgcolor = @yaml.groups_bgcolor_map[group_name.to_sym]
+
+      @gv.subgraph do
+        global group_conf.merge(label: group_name, bgcolor: group_bgcolor)
+        nodes nodes_conf
+        # model割り当て
+        models.each do |model|
+          node model
+        end
+      end
+    end
+  end
+
+  def remove_ext(file_name)
+    File.basename(file_name, '.*')
   end
 end

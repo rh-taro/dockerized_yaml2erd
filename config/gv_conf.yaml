@@ -1,0 +1,12 @@
+global_conf:
+  layout: dot
+
+entity_conf:
+  shape: Mrecord
+  fontname: Noto Sans CJK JP Black
+  fontsize: 50
+
+group_conf:
+  shape: Mrecord
+  fontname: Noto Sans CJK JP Black
+  fontsize: 120
