@@ -1,4 +1,5 @@
 require 'er_yaml_parser'
+require 'gv_id_map'
 
 class Yaml2Erd
   attr_accessor :group_global_conf
@@ -39,6 +40,7 @@ class Yaml2Erd
   def initialize(yaml_file_path, conf_yaml_path)
     @yaml = ErYamlParser.new(yaml_file_path)
     @gv = Gviz.new
+    @gv_id_map = GvIdMap.new
 
     apply_conf(conf_yaml_path)
   end
@@ -54,11 +56,11 @@ class Yaml2Erd
 
       # TODO: addとrouteの違いはなんだろう
       # entityの枠(model)作成
-      @gv.route model
+      @gv.route @gv_id_map.enc(model)
 
       # entityの中身(tableタグ)作成、適用
       table_tag = create_table_tag(model, columns, description)
-      @gv.node model, label: table_tag
+      @gv.node @gv_id_map.enc(model), label: table_tag
 
       # relation適用
       apply_relation(model, relations)
@@ -192,7 +194,7 @@ class Yaml2Erd
     relations.each do |relation|
       relation.each do |rel_type, rel_model|
         next if rel_type == :belongs_to
-        @gv.edge "#{model}_#{rel_model}", ARROW_MAP[rel_type]
+        @gv.edge "#{@gv_id_map.enc(model)}_#{@gv_id_map.enc(rel_model)}", ARROW_MAP[rel_type]
       end
     end
   end
@@ -205,13 +207,14 @@ class Yaml2Erd
     # mapをもとにグルーピング
     @yaml.groups_map.each do |group_name, models|
       group_bgcolor = @yaml.groups_bgcolor_map[group_name.to_sym]
+      alias_models = models.map do |model| @gv_id_map.enc(model) end
 
       @gv.subgraph do
         global group_conf.merge(label: group_name, bgcolor: group_bgcolor)
         nodes nodes_conf
         # model割り当て
-        models.each do |model|
-          node model
+        alias_models.each do |alias_model|
+          node alias_model
         end
       end
     end
