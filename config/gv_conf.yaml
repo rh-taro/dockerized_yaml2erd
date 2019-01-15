@@ -4,9 +4,19 @@ global_conf:
 entity_conf:
   shape: Mrecord
   fontname: Noto Sans CJK JP Black
-  fontsize: 50
+  fontsize: 20
 
 group_conf:
   shape: Mrecord
   fontname: Noto Sans CJK JP Black
-  fontsize: 120
+  fontsize: 40
+
+arrow_map:
+  has_many:
+    arrowsize: 3
+    minlen: 2
+    penwidth: 4
+  has_one:
+    arrowsize: 3
+    minlen: 2
+    penwidth: 4
