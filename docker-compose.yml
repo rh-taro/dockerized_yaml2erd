@@ -9,4 +9,4 @@ services:
       - .:/usr/src/yaml2erd:delegated
     stdin_open: true
     tty: true
-    command: /bin/sh -c 'bundle install;'
+    command: /bin/sh -c 'bundle install; /bin/sh;'
