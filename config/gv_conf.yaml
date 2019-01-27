@@ -1,5 +1,7 @@
 global_conf:
-  layout: dot
+  layout: fdp
+  splines: ortho
+  K: 5
 
 entity_conf:
   shape: Mrecord
@@ -14,9 +16,9 @@ group_conf:
 arrow_map:
   has_many:
     arrowsize: 3
-    minlen: 2
+    len: 10
     penwidth: 4
   has_one:
     arrowsize: 3
-    minlen: 2
+    len: 10
     penwidth: 4
