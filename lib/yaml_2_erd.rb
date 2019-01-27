@@ -17,7 +17,9 @@ class Yaml2Erd
 
   CUSTOMIZABLE_CONF = {
     global_conf: {
-      layout: 'dot'
+      layout: 'fdp',
+      splines: 'ortho',
+      K: 5
     },
     entity_conf: {
       shape: 'Mrecord',
@@ -30,12 +32,16 @@ class Yaml2Erd
       fontsize: 40
     },
     arrow_map: {
-      has_many: { arrowsize: 3, minlen: 2, penwidth: 4 },
-      has_one: { arrowsize: 3, minlen: 2, penwidth: 4 }
+      has_many: { arrowsize: 3, penwidth: 4, len: 10 },
+      has_one: { arrowsize: 3, penwidth: 4, len: 10 }
     }
   }.freeze
 
   NOT_CUSTOMIZABLE_CONF = {
+    global_conf: {
+      overlap: false,
+      sep: '+1'
+    },
     arrow_map: {
       has_many: { arrowhead: 'crow', arrowtail: 'tee', dir: 'both' },
       has_one: { arrowhead: 'tee', arrowtail: 'tee', dir: 'both' }
