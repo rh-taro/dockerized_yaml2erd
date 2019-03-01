@@ -1,7 +1,11 @@
 global_conf:
-  layout: fdp
+  layout: dot
   splines: ortho
-  K: 5
+  rankdir: LR
+  ranksep: 10
+  nodesep: 10
+  esep: '+3'
+  sep: '+3'
 
 entity_conf:
   shape: Mrecord
@@ -15,10 +19,18 @@ group_conf:
 
 arrow_map:
   has_many:
-    arrowsize: 3
-    len: 10
+    fontsize: 40
     penwidth: 4
+    minlen: 1
+    headlabel: 'N'
+    taillabel: '1'
+    labelfloat: false
+    dir: 'none'
   has_one:
-    arrowsize: 3
-    len: 10
+    fontsize: 40
     penwidth: 4
+    minlen: 1
+    headlabel: '1'
+    taillabel: '1'
+    labelfloat: false
+    dir: 'none'
